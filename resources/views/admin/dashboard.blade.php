@@ -1,0 +1,18 @@
+@extends('layouts.app')
+@section('title','Dashboard Admin')
+@section('body')
+<div x-data="{modal:false}" class="min-h-screen">
+  <nav class="border-b border-slate-200 bg-white"><div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"><div><span class="text-lg font-black text-indigo-600">FOUCREATIVE</span><span class="ml-2 text-sm text-slate-500">Inventaris Klien</span></div><form method="POST" action="{{ route('logout') }}">@csrf<button class="text-sm font-semibold text-slate-600">Keluar</button></form></div></nav>
+  <main class="mx-auto max-w-7xl px-6 py-8">
+    <div class="mb-8 flex items-end justify-between"><div><p class="text-sm text-slate-500">Ringkasan seluruh klien</p><h1 class="text-3xl font-black">Dashboard</h1></div><button @click="modal=true" class="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white">+ Tambah Klien Baru</button></div>
+    <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      @foreach(['draft'=>'Draft','in_progress'=>'Dalam Proses','ready_to_deploy'=>'Siap Deploy','completed'=>'Selesai'] as $key=>$label)<div class="rounded-2xl bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">{{ $label }}</p><p class="mt-2 text-3xl font-black">{{ $stats[$key] }}</p></div>@endforeach
+    </div>
+    <div class="overflow-hidden rounded-2xl bg-white shadow-sm"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-6 py-4">Klien</th><th>Status</th><th>Progress</th><th class="px-6 py-4">Aksi</th></tr></thead><tbody>
+    @forelse($clients as $client)<tr class="border-t"><td class="px-6 py-5"><p class="font-bold">{{ $client->company_name }}</p><p class="text-slate-500">{{ $client->brand_name ?? '-' }}</p></td><td><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">{{ $client->status }}</span></td><td><div class="h-2 w-32 rounded bg-slate-100"><div class="h-2 rounded bg-indigo-500" style="width:{{ $client->completion_percentage }}%"></div></div><span class="text-xs">{{ $client->completion_percentage }}%</span></td><td class="px-6 py-5" x-data="{toast:false}"><div class="flex gap-3"><button @click="navigator.clipboard.writeText('{{ url('/onboarding/'.$client->onboarding_token) }}');toast=true;setTimeout(()=>toast=false,2000)" class="text-indigo-600">Copy Link</button><span x-show="toast" class="text-xs text-emerald-600">Link berhasil disalin</span><a href="{{ route('admin.clients.show',$client) }}" class="font-semibold">Detail</a><a href="{{ route('admin.clients.export-pdf',$client) }}" class="text-slate-500">PDF</a></div></td></tr>@empty<tr><td colspan="4" class="px-6 py-10 text-center text-slate-400">Belum ada klien.</td></tr>@endforelse
+    </tbody></table></div>
+  </main>
+  <div x-show="modal" x-cloak class="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/50 p-4"><div @click.outside="modal=false" class="w-full max-w-lg rounded-2xl bg-white p-6"><h2 class="mb-5 text-xl font-bold">Tambah Klien Baru</h2><form method="POST" action="{{ route('admin.clients.store') }}" class="space-y-4">@csrf<input name="company_name" required placeholder="Nama Perusahaan" class="w-full rounded-lg border px-4 py-3"><input name="brand_name" placeholder="Nama Brand" class="w-full rounded-lg border px-4 py-3"><input name="phone" placeholder="Kontak PIC" class="w-full rounded-lg border px-4 py-3"><div class="flex justify-end gap-3"><button type="button" @click="modal=false" class="px-4 py-2">Batal</button><button class="rounded-lg bg-indigo-600 px-5 py-2 font-bold text-white">Simpan</button></div></form></div></div>
+</div>
+<style>[x-cloak]{display:none!important}</style>
+@endsection
