@@ -11,6 +11,7 @@ use App\Models\ClientOnboardingItem;
 use App\Models\ClientTechnicalChecklist;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Rules\RejectExecutableExtensions;
 
 class AdminClientController extends Controller
 {
@@ -31,13 +32,16 @@ class AdminClientController extends Controller
             'phone'=>'nullable|string|max:50','wa_business_number'=>'nullable|string|max:50',
             'wa_active_7_days'=>'nullable|boolean','system_email'=>'nullable|email|max:255',
             'nib_email'=>'nullable|email|max:255','website'=>'nullable|string|max:255',
-            'target_market'=>'nullable|array','corporate_emails'=>'nullable|array',
+            'target_market'=>'nullable|array','target_market.*'=>'nullable|string|max:100',
+            'target_market_custom'=>'nullable|array','target_market_custom.*'=>'nullable|string|max:100',
+            'corporate_emails'=>'nullable|array',
             'social_media'=>'nullable|array',
         ]);
         $data['wa_active_7_days'] = $request->boolean('wa_active_7_days');
-        if (array_key_exists('target_market', $data)) {
-            $data['target_market'] = array_values(array_filter($data['target_market'], fn ($value) => filled($value)));
-        }
+        $targetMarkets = array_merge($data['target_market'] ?? [], $data['target_market_custom'] ?? []);
+        $targetMarkets = array_map(fn ($value) => is_string($value) ? trim($value) : '', $targetMarkets);
+        $data['target_market'] = array_values(array_unique(array_filter($targetMarkets, fn ($value) => filled($value))));
+        unset($data['target_market_custom']);
         if (array_key_exists('corporate_emails', $data)) {
             $data['corporate_emails'] = array_values(array_filter($data['corporate_emails'], fn ($value) => filled($value)));
         }
@@ -92,14 +96,22 @@ class AdminClientController extends Controller
             'category'=>'sometimes|required|in:legal,access,billing,asset,addon',
             'package_choice'=>'nullable|string|max:255','billing_schedule'=>'nullable|string|max:255',
             'has_chatbot_addon'=>'nullable|boolean',
-            'file'=>'nullable|file|max:10240',
+            'file'=>['nullable','file','max:10240',new RejectExecutableExtensions],
         ]);
         if ($request->has('has_chatbot_addon')) $data['has_chatbot_addon'] = $request->boolean('has_chatbot_addon');
+        $oldFilePath = $item->file_path;
+        $newFilePath = null;
         if ($request->hasFile('file')) {
-            if ($item->file_path) Storage::disk('public')->delete($item->file_path);
-            $data['file_path'] = $request->file('file')->store('clients/'.$client->id, 'public');
+            $newFilePath = $request->file('file')->store('clients/'.$client->id, 'public');
+            if ($newFilePath === false) {
+                throw new \RuntimeException('File gagal disimpan ke penyimpanan publik.');
+            }
+            $data['file_path'] = $newFilePath;
         }
         $item->update($data);
+        if ($oldFilePath && $newFilePath && $oldFilePath !== $newFilePath) {
+            Storage::disk('public')->delete($oldFilePath);
+        }
         return back()->with('success','Status kelengkapan diperbarui.');
     }
     public function storeItem(Request $request, Client $client)
@@ -109,9 +121,14 @@ class AdminClientController extends Controller
             'status'=>'required|in:SUDAH LENGKAP,MASIH PROSES,BELUM DITERIMA,MENYUSUL',
             'detail_notes'=>'nullable|string','package_choice'=>'nullable|string|max:255',
             'billing_schedule'=>'nullable|string|max:255','has_chatbot_addon'=>'nullable|boolean',
-            'file'=>'nullable|file|max:10240',
+            'file'=>['nullable','file','max:10240',new RejectExecutableExtensions],
         ]);
-        if ($request->hasFile('file')) $data['file_path'] = $request->file('file')->store('clients/'.$client->id,'public');
+        if ($request->hasFile('file')) {
+            $data['file_path'] = $request->file('file')->store('clients/'.$client->id,'public');
+            if ($data['file_path'] === false) {
+                throw new \RuntimeException('File gagal disimpan ke penyimpanan publik.');
+            }
+        }
         $data['has_chatbot_addon'] = $request->boolean('has_chatbot_addon');
         $client->onboardingItems()->create($data);
         return back()->with('success','Item onboarding berhasil ditambahkan.');

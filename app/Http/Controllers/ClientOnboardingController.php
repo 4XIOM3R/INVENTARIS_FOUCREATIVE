@@ -10,6 +10,8 @@ use App\Models\ClientCredential;
 use App\Models\ClientKbli;
 use App\Models\ClientKnowledgeBase;
 use App\Models\ClientOnboardingItem;
+use App\Rules\RejectExecutableExtensions;
+use Illuminate\Support\Str;
 
 class ClientOnboardingController extends Controller
 {
@@ -43,8 +45,17 @@ class ClientOnboardingController extends Controller
     public function profile(Request $request)
     {
         $client=$this->client($request);
-        $data=$request->validate(['company_name'=>'required|string|max:255','brand_name'=>'nullable|string|max:255','established_year'=>'nullable|string|max:20','company_history'=>'nullable|string','positioning_statement'=>'nullable|string','target_market'=>'nullable|array']);
-        $data['target_market']=$data['target_market'] ?? [];
+        $data=$request->validate([
+            'company_name'=>'required|string|max:255','brand_name'=>'nullable|string|max:255',
+            'established_year'=>'nullable|string|max:20','company_history'=>'nullable|string',
+            'positioning_statement'=>'nullable|string','target_market'=>'nullable|array',
+            'target_market.*'=>'nullable|string|max:100','target_market_custom'=>'nullable|array',
+            'target_market_custom.*'=>'nullable|string|max:100',
+        ]);
+        $targetMarkets = array_merge($data['target_market'] ?? [], $data['target_market_custom'] ?? []);
+        $targetMarkets = array_map(fn ($value) => is_string($value) ? trim($value) : '', $targetMarkets);
+        $data['target_market'] = array_values(array_unique(array_filter($targetMarkets, fn ($value) => filled($value))));
+        unset($data['target_market_custom']);
         $client->update($data);
         $this->mark($client,'Profil Perusahaan','SUDAH LENGKAP');
         return $this->saved($request,'Modul identitas tersimpan.',$client,1);
@@ -96,18 +107,32 @@ class ClientOnboardingController extends Controller
     {
         $client=$this->client($request);
         $request->validate([
-            'logo' => 'nullable|file|mimes:png,jpg,jpeg,svg,ai,zip,pdf|max:10240',
-            'npwp' => 'nullable|file|mimes:png,jpg,jpeg,pdf|max:10240',
-            'faq' => 'nullable|file|mimes:xlsx,xls,csv|max:10240',
-            'chat_example' => 'nullable|file|max:10240',
+            'logo' => ['nullable','file','max:10240',new RejectExecutableExtensions],
+            'npwp' => ['nullable','file','max:10240',new RejectExecutableExtensions],
+            'faq' => ['nullable','file','max:10240',new RejectExecutableExtensions],
+            'chat_example' => ['nullable','file','max:10240',new RejectExecutableExtensions],
         ]);
         $allowed=['logo'=>'logo_original','npwp'=>'npwp','faq'=>'faq_knowledge','chat_example'=>'chat_example'];
         foreach ($allowed as $field=>$name) {
             if (!$request->hasFile($field)) continue;
             $file=$request->file($field);
-            $path=$file->storeAs('clients/'.$client->id, $name.'_'.time().'.'.$file->getClientOriginalExtension(),'public');
-            $item=$client->onboardingItems()->firstOrCreate(['item_name'=>match($name){'logo_original'=>'Logo Asli','npwp'=>'NPWP Perusahaan','faq'=>'Excel Product Knowledge / FAQ','chat_example'=>'Contoh Percakapan Chat'}],['category'=>$name==='logo_original'||$name==='npwp'?'asset':'addon']);
-            $item->update(['file_path'=>$path,'status'=>'SUDAH LENGKAP']);
+            $itemName=match($name){'logo_original'=>'Logo Asli','npwp'=>'NPWP Perusahaan','faq_knowledge'=>'Excel Product Knowledge / FAQ','chat_example'=>'Contoh Percakapan Chat'};
+            $item=$client->onboardingItems()->firstOrNew(
+                ['item_name'=>$itemName],
+                ['category'=>$name==='logo_original'||$name==='npwp'?'asset':'addon']
+            );
+            $oldPath=$item->file_path;
+            $extension=strtolower(trim($file->getClientOriginalExtension()));
+            $extension=preg_match('/\A[a-z0-9]{1,20}\z/',$extension) ? $extension : '';
+            $filename=$name.'_'.Str::uuid().($extension !== '' ? '.'.$extension : '');
+            $path=$file->storeAs('clients/'.$client->id,$filename,'public');
+            if ($path === false) {
+                throw new \RuntimeException('File gagal disimpan ke penyimpanan publik.');
+            }
+            $item->fill(['file_path'=>$path,'status'=>'SUDAH LENGKAP'])->save();
+            if ($oldPath && $oldPath !== $path) {
+                Storage::disk('public')->delete($oldPath);
+            }
         }
         return $this->saved($request,'Aset dan dokumen tersimpan.',$client,6);
     }

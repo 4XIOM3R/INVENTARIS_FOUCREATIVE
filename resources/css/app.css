@@ -6,6 +6,328 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer base {
+    .glass-page {
+        min-height: 100vh;
+        background: #FAFAFA;
+        color: #09090B;
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        --text-primary: #09090B;
+        --text-secondary: #52525B;
+        --text-muted: #71717A;
+        --accent-primary: #4F46E5;
+        --surface: #FFFFFF;
+        --surface-secondary: #F4F4F5;
+        --surface-border: #E4E4E7;
+    }
+
+    .glass-page button,
+    .glass-page input,
+    .glass-page textarea,
+    .glass-page select {
+        font-family: inherit;
+    }
+
+    .glass-page h1,
+    .glass-page h2,
+    .glass-page h3 {
+        font-weight: 600;
+        letter-spacing: -0.025em;
+    }
+}
+
+@layer components {
+    .glass-panel {
+        background: var(--surface, #FFFFFF);
+        border: 1px solid var(--surface-border, #E4E4E7);
+    }
+
+    .glass-input,
+    .field {
+        width: 100%;
+        min-width: 0;
+        border: 1px solid #D4D4D8;
+        border-radius: 0.625rem;
+        background: #FFFFFF;
+        color: #09090B;
+        color-scheme: light;
+    }
+
+    .glass-input,
+    .field:not(textarea) {
+        min-height: 2.75rem;
+        padding: 0.625rem 0.75rem;
+    }
+
+    textarea.field {
+        padding: 0.75rem;
+    }
+
+    .glass-input::placeholder,
+    .field::placeholder {
+        color: #71717A;
+        opacity: 1;
+    }
+
+    .glass-input:focus,
+    .field:focus {
+        border-color: #A1A1AA;
+        outline: 2px solid rgba(24, 24, 27, 0.12);
+        outline-offset: 1px;
+    }
+
+    .glass-page input[type='checkbox'],
+    .glass-page input[type='radio'] {
+        accent-color: #18181B;
+    }
+
+    .glass-page input[type='date'],
+    .glass-page input[name='year'],
+    .glass-page input[name='established_year'],
+    .glass-page input[name='task_code'],
+    .glass-page input[name='kbli_code'],
+    .glass-page input[name$='[kbli_code]'] {
+        font-variant-numeric: tabular-nums;
+    }
+
+    .glass-page input[type='file'] {
+        min-height: 3rem;
+        padding: 0.5rem;
+        cursor: pointer;
+    }
+
+    .glass-page input[type='file']::file-selector-button {
+        margin-right: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        color: #27272A;
+        background: #F4F4F5;
+        border: 1px solid #E4E4E7;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+
+    .glass-page option {
+        color: #09090B;
+        background: #FFFFFF;
+    }
+
+    .glass-btn-primary {
+        color: #FFFFFF;
+        background: #18181B;
+        border: 1px solid #18181B;
+    }
+
+    .glass-btn-primary:hover {
+        background: #27272A;
+    }
+
+    .glass-btn-secondary {
+        color: #3F3F46;
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+    }
+
+    .glass-btn-secondary:hover {
+        background: #F4F4F5;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: #18181B;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .field-hint {
+        margin-top: 0.35rem;
+        color: #71717A;
+        font-size: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .step-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #D4D4D8 transparent;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .upload-card {
+        min-width: 0;
+        border-style: dashed;
+        border-color: #D4D4D8;
+        background: rgba(250, 250, 250, 0.7);
+    }
+
+    .admin-client-nav {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+    }
+
+    .admin-client-hero {
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+    }
+
+    .dashboard-page {
+        min-height: 100vh;
+        color: #09090B;
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .dashboard-page .dashboard-nav {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid #E4E4E7;
+    }
+
+    .dashboard-page .brand-mark {
+        color: #18181B;
+        font-weight: 600;
+    }
+
+    .dashboard-page .brand-copy,
+    .dashboard-page .summary-label,
+    .dashboard-page .stat-label {
+        color: #71717A;
+    }
+
+    .dashboard-page .dashboard-title,
+    .dashboard-page .stat-value,
+    .dashboard-page .client-name {
+        color: #09090B;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    .dashboard-page .logout-button {
+        color: #3F3F46;
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+    }
+
+    .dashboard-page .logout-button:hover {
+        background: #F4F4F5;
+    }
+
+    .dashboard-page .add-client-button {
+        background: #18181B;
+        border: 1px solid #18181B;
+    }
+
+    .dashboard-page .add-client-button:hover {
+        background: #27272A;
+    }
+
+    .dashboard-page .stat-card,
+    .dashboard-page .table-panel,
+    .dashboard-page .mobile-client-card {
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+    }
+
+    .dashboard-page .dashboard-table-head {
+        background: #F4F4F5;
+        color: #71717A;
+    }
+
+    .dashboard-page .dashboard-table-head th {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+    }
+
+    .dashboard-page .client-row {
+        border-color: #E4E4E7;
+    }
+
+    .dashboard-page .client-row:hover {
+        background: #FAFAFA;
+    }
+
+    .dashboard-page .client-brand,
+    .dashboard-page .empty-state {
+        color: #71717A;
+    }
+
+    .dashboard-page .status-badge {
+        border: 1px solid transparent;
+    }
+
+    .dashboard-page .progress-track {
+        display: inline-block;
+        overflow: hidden;
+        background: #E4E4E7;
+        vertical-align: middle;
+    }
+
+    .dashboard-page .progress-fill {
+        min-width: 0;
+        background: #18181B;
+    }
+
+    .dashboard-page .progress-value {
+        margin-left: 0.5rem;
+        color: #52525B;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dashboard-page .mobile-progress-label {
+        color: #71717A;
+    }
+
+    .dashboard-page .mobile-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.25rem;
+        white-space: nowrap;
+        color: #3F3F46;
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+    }
+
+    .dashboard-page .mobile-action:hover {
+        background: #F4F4F5;
+    }
+
+    .dashboard-page .copy-toast {
+        color: #15803D;
+    }
+
+    .dashboard-page .dashboard-modal {
+        color: #09090B;
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+        box-shadow: 0 12px 32px rgba(24, 24, 27, 0.12);
+    }
+
+    .dashboard-page .modal-cancel {
+        color: #52525B;
+    }
+
+    @media (max-width: 767px) {
+        .glass-page button {
+            min-height: 2.75rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .dashboard-page .table-panel {
+            overflow-x: auto;
+        }
+
+        .dashboard-page table {
+            min-width: 760px;
+        }
+    }
 }

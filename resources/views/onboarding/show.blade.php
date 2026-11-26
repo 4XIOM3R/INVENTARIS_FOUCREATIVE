@@ -8,6 +8,10 @@ $services = $client->knowledgeBases->where('section_type','service_ecosystem')->
 $team = $client->knowledgeBases->where('section_type','team_member')->values();
 $portfolios = $client->knowledgeBases->where('section_type','portfolio')->values();
 $awards = $client->knowledgeBases->where('section_type','award')->values();
+$targetMarketPresets = ['BUMN/BUMD','Kementerian/Lembaga','Perusahaan Swasta Besar','LSM Besar/Asing','Perwakilan Perusahaan Asing','UMKM'];
+$customTargetMarkets = collect($client->target_market ?? [])
+    ->reject(fn ($target) => in_array($target, $targetMarketPresets, true))
+    ->values();
 $steps = [
  ['Profil Perusahaan','Ceritakan nama dan identitas usaha'],
  ['Legalitas & Bidang Usaha','Lengkapi dokumen dan KBLI'],
@@ -20,19 +24,19 @@ $steps = [
  ['Portofolio & Penghargaan','Tambahkan bukti pengalaman'],
 ];
 @endphp
-<div x-data="onboardingWizard()" x-init="init()" class="min-h-screen bg-slate-50">
-  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+<div x-data="onboardingWizard()" x-init="init()" class="onboarding-page relative min-h-screen">
+  <header class="glass-panel sticky top-0 z-30 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
     <div class="mx-auto max-w-6xl px-4 py-4">
       <div class="flex items-center justify-between gap-4">
         <div>
           <p class="text-xs font-bold uppercase tracking-widest text-indigo-600">Isi data dengan mudah</p>
-          <h1 class="text-lg font-black text-slate-900 sm:text-xl">{{ $client->brand_name ?: $client->company_name }}</h1>
+          <h1 class="break-words text-lg font-semibold text-zinc-950 sm:text-xl">{{ $client->brand_name ?: $client->company_name }}</h1>
         </div>
-        <a href="https://wa.me/6282174162002?text={{ urlencode('Halo Admin, saya membutuhkan bantuan mengisi portal onboarding '.$client->company_name) }}" target="_blank" class="rounded-full bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-600">Bantuan WhatsApp</a>
+        <a href="https://wa.me/6282182851217?text={{ urlencode('Halo Admin, saya membutuhkan bantuan mengisi portal onboarding '.$client->company_name) }}" target="_blank" rel="noopener" class="glass-btn-secondary min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-bold">Bantuan WhatsApp</a>
       </div>
       <div class="mt-4">
-        <div class="mb-2 flex justify-between text-xs font-semibold"><span x-text="'Langkah '+module+' dari 9'"></span><span><span x-text="progress+'% lengkap'"></span> · <span x-text="saveState"></span></span></div>
-        <div class="h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-2 rounded-full bg-indigo-600 transition-all" :style="'width:'+progress+'%'"></div></div>
+        <div class="mb-2 flex items-center justify-between gap-3 text-xs font-medium text-zinc-600"><span x-text="'Langkah '+module+' dari 9'"></span><span class="flex items-center gap-2"><span class="tabular-nums" x-text="progress+'% lengkap'"></span><span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-700"><span class="h-1.5 w-1.5 rounded-full" :class="saveState==='Tersimpan'?'bg-emerald-500':'bg-amber-500'"></span><span x-text="saveState"></span></span></span></div>
+        <div class="h-1.5 overflow-hidden rounded-full bg-zinc-200"><div class="h-1.5 rounded-full bg-zinc-900 transition-all" :style="'width:'+progress+'%'"></div></div>
       </div>
     </div>
   </header>
@@ -44,22 +48,30 @@ $steps = [
         <div><p class="font-black text-emerald-900">Data sudah dikirim</p><p class="mt-1 text-sm text-emerald-800">Tim admin sedang memeriksa data Anda. Jika perlu revisi, modul terkait akan ditandai dan tim akan menghubungi Anda.</p></div>
       </div>
     @endif
+    <nav class="step-scroll glass-panel mb-4 flex gap-2 overflow-x-auto rounded-2xl p-2 lg:hidden" aria-label="Langkah onboarding">
+      @foreach($steps as $i=>$step)
+        <button type="button" @click="go({{ $i+1 }})" :aria-current="module==={{ $i+1 }}?'step':null" :class="module==={{ $i+1 }}?'border-zinc-900 bg-zinc-100':'border-zinc-200 bg-white'" class="flex min-w-[152px] shrink-0 items-center gap-2 rounded-xl border p-3 text-left">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-semibold text-zinc-700">{{ $i+1 }}</span>
+          <span class="text-xs font-medium text-zinc-800">{{ $step[0] }}</span>
+        </button>
+      @endforeach
+    </nav>
     <div class="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
       <aside class="hidden lg:block">
         <nav class="sticky top-28 space-y-2 rounded-2xl border border-slate-200 bg-white p-3">
           @foreach($steps as $i=>$step)
-          <button type="button" @click="go({{ $i+1 }})" :class="module==={{ $i+1 }}?'border-indigo-600 bg-indigo-50':'border-transparent'" class="flex w-full items-center gap-3 rounded-xl border p-3 text-left">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black" :class="completeModules.includes({{ $i+1 }})?'bg-emerald-500 text-white':(module==={{ $i+1 }}?'bg-indigo-600 text-white':'bg-slate-100 text-slate-500')" x-text="completeModules.includes({{ $i+1 }})?'✓':'{{ $i+1 }}'"></span>
+          <button type="button" @click="go({{ $i+1 }})" :class="module==={{ $i+1 }}?'border-zinc-900 bg-zinc-50':'border-transparent'" class="flex w-full items-center gap-3 rounded-xl border p-3 text-left">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold" :class="completeModules.includes({{ $i+1 }})?'bg-emerald-600 text-white':(module==={{ $i+1 }}?'bg-zinc-900 text-white':'bg-zinc-100 text-zinc-500')" x-text="completeModules.includes({{ $i+1 }})?'✓':'{{ $i+1 }}'"></span>
             <span><b class="block text-sm">{{ $step[0] }}</b><small class="text-slate-500" x-text="reviewStatus[{{ $i+1 }}] || (completeModules.includes({{ $i+1 }})?'Lengkap':(savedModules.includes({{ $i+1 }})?'Tersimpan':'Belum diisi'))"></small></span>
           </button>
           @endforeach
         </nav>
       </aside>
 
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="glass-panel min-w-0 rounded-2xl border border-zinc-200 bg-white">
         <div class="border-b px-5 py-4 sm:px-8">
           <p class="text-sm font-bold text-indigo-600" x-text="'Langkah '+module+' dari 9'"></p>
-          <h2 class="mt-1 text-2xl font-black text-slate-900" x-text="titles[module-1]"></h2>
+          <h2 class="mt-1 text-2xl font-semibold text-slate-900" x-text="titles[module-1]"></h2>
           <p class="mt-2 text-sm text-slate-500" x-text="help[module-1]"></p>
         </div>
 
@@ -84,7 +96,15 @@ $steps = [
               </div>
               <div><label class="field-label">Sejarah Singkat Perusahaan</label><textarea name="company_history" class="field min-h-28" placeholder="Contoh: Berdiri sejak 2002 sebagai konsultan komunikasi korporat untuk BUMN dan perusahaan swasta.">{{ $client->company_history }}</textarea><p class="field-hint">Uraikan berdiri sejak kapan dan kegiatan utama perusahaan.</p></div>
               <div><label class="field-label">Kalimat Utama / Positioning</label><textarea name="positioning_statement" class="field min-h-24" placeholder="Contoh: Kami membantu organisasi membangun reputasi melalui solusi komunikasi terintegrasi.">{{ $client->positioning_statement }}</textarea><p class="field-hint">Tuliskan satu kalimat yang menjelaskan keunggulan atau janji utama perusahaan.</p></div>
-              <fieldset><legend class="field-label">Siapa target pelanggan utama?</legend><div class="grid gap-2 sm:grid-cols-2">@foreach(['BUMN/BUMD','Kementerian/Lembaga','Perusahaan Swasta Besar','LSM Besar/Asing','Perwakilan Perusahaan Asing','UMKM'] as $target)<label class="flex items-center gap-3 rounded-xl border p-3"><input type="checkbox" name="target_market[]" value="{{ $target }}" @checked(in_array($target,$client->target_market ?? [])) class="h-4 w-4"><span>{{ $target }}</span></label>@endforeach</div></fieldset>
+              <fieldset x-data="{customTargets:@js($customTargetMarkets),addTarget(){this.customTargets.push('');this.$nextTick(()=>this.$root.closest('form').dispatchEvent(new Event('input',{bubbles:true})))},removeTarget(index){this.customTargets.splice(index,1);this.$nextTick(()=>this.$root.closest('form').dispatchEvent(new Event('input',{bubbles:true})))}}" class="space-y-4">
+                <legend class="field-label">Siapa target pelanggan utama?</legend>
+                <div class="grid gap-2 sm:grid-cols-2">@foreach($targetMarketPresets as $target)<label class="flex items-center gap-3 rounded-xl border border-zinc-200 p-3"><input type="checkbox" name="target_market[]" value="{{ $target }}" @checked(in_array($target,$client->target_market ?? [])) class="h-4 w-4"><span>{{ $target }}</span></label>@endforeach</div>
+                <div class="rounded-xl border border-zinc-200 bg-zinc-50/60 p-4">
+                  <div class="mb-3 flex flex-wrap items-center justify-between gap-2"><div><p class="text-sm font-medium text-zinc-900">Lainnya / Tambah Target Sendiri</p><p class="field-hint">Tambahkan target pelanggan di luar pilihan di atas.</p></div><button type="button" @click="addTarget()" class="glass-btn-secondary rounded-lg px-3 py-2 text-sm font-medium">+ Tambah</button></div>
+                  <input type="hidden" name="target_market_custom[]" value="">
+                  <div class="space-y-2"><template x-for="(target,index) in customTargets" :key="index"><div class="flex gap-2"><input x-model="customTargets[index]" name="target_market_custom[]" maxlength="100" class="field" placeholder="Contoh: Startup teknologi"><button type="button" @click="removeTarget(index)" class="glass-btn-secondary shrink-0 rounded-lg px-3 text-sm text-red-600" aria-label="Hapus target">Hapus</button></div></template></div>
+                </div>
+              </fieldset>
               <button type="submit" class="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white">Simpan langkah ini</button>
             </form>
           </section>
@@ -120,7 +140,7 @@ $steps = [
               @php($platforms=['system_email'=>'Email Sistem','facebook_fanpage'=>'Facebook / Fanpage','instagram'=>'Instagram','domain_panel'=>'Akses Website'])
               @foreach($platforms as $platform=>$label)
               @php($credential=$client->credentials->firstWhere('platform',$platform))
-              <div class="rounded-xl border border-slate-200 p-4"><h3 class="mb-3 font-black">{{ $label }}</h3><div class="grid gap-3 sm:grid-cols-2"><div><label class="field-label">Nama pengguna / email</label><input name="credentials[{{ $platform }}][username_or_email]" value="{{ $credential?->username_or_email }}" class="field" placeholder="{{ $platform==='system_email'?'Contoh: spora.comm@gmail.com':($platform==='instagram'?'Contoh: spora.comm':($platform==='domain_panel'?'Contoh: admin@spora.co.id':'Contoh: nama akun Facebook')) }}"><p class="field-hint">Masukkan username atau alamat email login.</p></div><div x-data="{show:false}"><label class="field-label">Password / kode akses</label><div class="flex gap-2"><input :type="show?'text':'password'" name="credentials[{{ $platform }}][secret_value]" class="field" placeholder="Contoh format: Tulis password akun Anda"><button type="button" @click="show=!show" class="rounded-lg border px-3 text-sm" x-text="show?'Sembunyi':'Lihat'"></button></div><p class="field-hint">Kosongkan jika belum ada atau belum siap membagikan.</p></div><div><label class="field-label">PIC yang memegang OTP/HP</label><input name="credentials[{{ $platform }}][pic_name]" value="{{ $credential?->pic_name }}" class="field" placeholder="Contoh: Muharomah"><p class="field-hint">Nama orang yang dapat menerima kode OTP.</p></div><div><label class="field-label">Nomor WhatsApp PIC</label><input name="credentials[{{ $platform }}][pic_contact]" value="{{ $credential?->pic_contact }}" class="field" placeholder="Contoh: 0821-7416-2002"><p class="field-hint">Nomor aktif untuk koordinasi dan OTP.</p></div></div>@if($platform==='domain_panel')<label class="mt-4 flex items-center gap-3 rounded-lg bg-amber-50 p-3 text-sm"><input type="checkbox" name="credentials[domain_panel][needs_new_domain]" value="1" @checked($credential?->needs_new_domain)>Jika akses lama tidak ditemukan, setuju dibuatkan domain baru untuk Landing Page.</label>@endif</div>
+              <div class="glass-panel rounded-xl border border-slate-200 p-4"><h3 class="mb-3 font-black">{{ $label }}</h3><div class="grid gap-3 sm:grid-cols-2"><div><label class="field-label">Nama pengguna / email</label><input name="credentials[{{ $platform }}][username_or_email]" value="{{ $credential?->username_or_email }}" class="field" placeholder="{{ $platform==='system_email'?'Contoh: spora.comm@gmail.com':($platform==='instagram'?'Contoh: spora.comm':($platform==='domain_panel'?'Contoh: admin@spora.co.id':'Contoh: nama akun Facebook')) }}"><p class="field-hint">Masukkan username atau alamat email login.</p></div><div x-data="{show:false}"><label class="field-label">Password / kode akses</label><div class="flex gap-2"><input :type="show?'text':'password'" name="credentials[{{ $platform }}][secret_value]" class="field min-w-0" placeholder="Contoh format: Tulis password akun Anda"><button type="button" @click="show=!show" class="glass-btn-secondary min-h-11 shrink-0 rounded-lg px-3 text-sm" x-text="show?'Sembunyi':'Lihat'"></button></div><p class="field-hint">Kosongkan jika belum ada atau belum siap membagikan.</p></div><div><label class="field-label">PIC yang memegang OTP/HP</label><input name="credentials[{{ $platform }}][pic_name]" value="{{ $credential?->pic_name }}" class="field" placeholder="Contoh: Muharomah"><p class="field-hint">Nama orang yang dapat menerima kode OTP.</p></div><div><label class="field-label">Nomor WhatsApp PIC</label><input name="credentials[{{ $platform }}][pic_contact]" value="{{ $credential?->pic_contact }}" class="field" placeholder="Contoh: 0821-7416-2002"><p class="field-hint">Nomor aktif untuk koordinasi dan OTP.</p></div></div>@if($platform==='domain_panel')<label class="mt-4 flex items-center gap-3 rounded-lg bg-amber-50 p-3 text-sm"><input type="checkbox" name="credentials[domain_panel][needs_new_domain]" value="1" @checked($credential?->needs_new_domain)>Jika akses lama tidak ditemukan, setuju dibuatkan domain baru untuk Landing Page.</label>@endif</div>
               @endforeach
               <button type="submit" class="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white">Simpan langkah ini</button>
             </form>
@@ -139,7 +159,7 @@ $steps = [
           <section x-show="module===6">
             <form method="POST" data-autosave-url="{{ route('onboarding.autosave',[$client->onboarding_token,6]) }}" action="{{ route('onboarding.assets',$client->onboarding_token) }}" enctype="multipart/form-data" class="space-y-5">@csrf
               @foreach(['logo'=>'Logo Asli','npwp'=>'NPWP Perusahaan','faq'=>'Excel Pengetahuan Produk / FAQ','chat_example'=>'Contoh Percakapan Chat'] as $field=>$label)
-              <div class="rounded-xl border p-4"><label class="field-label">{{ $label }}</label><input type="file" name="{{ $field }}" onchange="validateUpload(this)" @if($field==='logo') accept=".png,.jpg,.jpeg,.svg,.ai,.zip,.pdf" @elseif($field==='npwp') accept=".png,.jpg,.jpeg,.pdf" @elseif($field==='faq') accept=".xlsx,.xls,.csv" @endif class="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:font-bold file:text-indigo-700"><p class="upload-status mt-2 text-xs text-slate-500">Anda bisa memilih foto/PDF dari HP atau komputer. Maksimal 10 MB.</p></div>
+              <label class="glass-panel upload-card block cursor-pointer rounded-2xl border-dashed border-zinc-300 bg-zinc-50/50 p-4 sm:p-5"><span class="field-label">{{ $label }}</span><input type="file" name="{{ $field }}" onchange="validateUpload(this)" class="glass-input mt-2 block min-h-12 w-full text-sm"><span class="upload-status mt-2 block text-xs text-slate-500">Anda bisa memilih format gambar atau file apa pun dari HP atau komputer. Maksimal 10 MB.</span></label>
               @endforeach
               @if($client->onboardingItems->whereNotNull('file_path')->count())<div class="rounded-xl bg-emerald-50 p-4 text-sm">@foreach($client->onboardingItems->whereNotNull('file_path') as $item)<a target="_blank" href="{{ asset('storage/'.$item->file_path) }}" class="mr-4 block py-1 font-bold text-emerald-700">Lihat file {{ $item->item_name }}</a>@endforeach</div>@endif
               <button type="submit" class="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white">Simpan langkah ini</button>
@@ -187,7 +207,7 @@ $steps = [
     </div>
   </main>
   <div x-show="preview" x-cloak class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-0 sm:items-center sm:p-4">
-    <div @click.outside="preview=false" class="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-5 sm:rounded-2xl sm:p-7">
+    <div @click.outside="preview=false" class="glass-panel max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-5 sm:rounded-2xl sm:p-7">
       <div class="flex items-start justify-between">
         <div><p class="text-xs font-bold uppercase tracking-widest text-indigo-600">Ringkasan</p><h2 class="mt-1 text-2xl font-black">Periksa data utama</h2></div>
         <button type="button" @click="preview=false" class="rounded-full border px-3 py-2" aria-label="Tutup">✕</button>
@@ -203,21 +223,15 @@ $steps = [
       <button type="button" @click="preview=false" class="mt-5 w-full rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white">Saya sudah memeriksa</button>
     </div>
   </div>
-  <nav class="fixed inset-x-3 bottom-3 z-40 flex items-center justify-between rounded-2xl border bg-white p-2 shadow-xl sm:hidden">
+  <nav class="glass-panel fixed inset-x-3 bottom-3 z-40 flex items-center justify-between rounded-2xl border bg-white p-2 sm:hidden">
     <button type="button" x-show="module>1" @click="go(module-1)" class="rounded-xl px-4 py-3 font-bold text-slate-600">← Kembali</button>
     <span x-show="module===1" class="px-2 text-xs font-bold text-slate-400">Langkah 1 dari 9</span>
     <button type="button" x-show="module<9" @click="go(module+1)" class="ml-auto rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white">Lanjut →</button>
   </nav>
-  <button onclick="window.open('https://wa.me/6282174162002?text={{ urlencode('Halo Admin, saya membutuhkan bantuan mengisi portal onboarding '.$client->company_name) }}','_blank')" class="fixed bottom-20 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-sm font-black text-white shadow-xl sm:bottom-5" title="Bantuan WhatsApp">WA</button>
 </div>
 
 <template id="wizard-buttons-template"></template>
-<style>
-.field{width:100%;border:1px solid #cbd5e1;border-radius:.75rem;padding:.75rem 1rem;outline:none}.field:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
-.field-label{display:block;margin-bottom:.45rem;font-size:.875rem;font-weight:700;color:#334155}
-.field-hint{margin-top:.35rem;font-size:.75rem;line-height:1.35;color:#64748b}
-[x-cloak]{display:none!important}
-</style>
+<style>[x-cloak]{display:none!important}</style>
 <script>
 function validateUpload(input){
   const status=input.parentElement.querySelector('.upload-status');

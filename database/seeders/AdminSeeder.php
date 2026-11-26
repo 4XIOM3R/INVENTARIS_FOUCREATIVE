@@ -17,9 +17,14 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
+        $adminPassword = env('ADMIN_PASSWORD');
+        if (!is_string($adminPassword) || trim($adminPassword) === '') {
+            throw new \RuntimeException('Set ADMIN_PASSWORD in the environment before running database seeders.');
+        }
+
         User::updateOrCreate(
-            ['email' => 'admin@agency.com'],
-            ['name' => 'FOUcreative', 'password' => Hash::make('FOUcreative321')]
+            ['email' => env('ADMIN_EMAIL', 'admin@foucreative.local')],
+            ['name' => env('ADMIN_NAME', 'FOUcreative'), 'password' => Hash::make($adminPassword)]
         );
 
         $client = Client::firstOrCreate(
@@ -77,7 +82,8 @@ class AdminSeeder extends Seeder
         foreach ($credentials as $platform=>$data) {
             [$username,$secret,$pic,$contact,$needsDomain,$verification,$notes] = $data;
             $attributes = ['username_or_email'=>$username,'pic_name'=>$pic,'pic_contact'=>$contact,'needs_new_domain'=>$needsDomain,'verification_status'=>$verification,'notes'=>$notes];
-            $attributes['secret_value'] = $secret !== '' ? $secret : null;
+            // Demo seeders must never contain real account passwords or API secrets.
+            $attributes['secret_value'] = null;
             ClientCredential::updateOrCreate(['client_id'=>$client->id,'platform'=>$platform],$attributes);
         }
 

@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">Arsitektur Sistem Inventaris FOUCreative</title>
+  <desc id="description">Diagram arsitektur aplikasi Laravel untuk administrasi klien dan portal onboarding FOUCreative.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1224"/>
+      <stop offset=".55" stop-color="#172554"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".06"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#020617" flood-opacity=".35"/>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#fff" stroke-opacity=".035" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1 1L11 6 1 11Z" fill="#67e8f9"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1 1L11 6 1 11Z" fill="#c4b5fd"/>
+    </marker>
+    <style>
+      text{font-family:Inter,"Segoe UI",Arial,sans-serif}
+      .title{fill:#f8fafc;font-size:34px;font-weight:800;letter-spacing:.3px}
+      .subtitle{fill:#cbd5e1;font-size:16px}
+      .section{fill:#a5f3fc;font-size:13px;font-weight:800;letter-spacing:2px}
+      .card-title{fill:#f8fafc;font-size:18px;font-weight:750}
+      .body{fill:#dbeafe;font-size:14px}
+      .muted{fill:#a5b4fc;font-size:12px}
+      .pill{fill:#e0e7ff;font-size:12px;font-weight:650}
+      .edge{fill:none;stroke:#67e8f9;stroke-width:2.4;marker-end:url(#arrow-blue)}
+      .edge-soft{fill:none;stroke:#c4b5fd;stroke-width:2;stroke-dasharray:7 7;marker-end:url(#arrow-violet)}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#background)"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+  <circle cx="1420" cy="90" r="220" fill="#6366f1" opacity=".10"/>
+  <circle cx="180" cy="825" r="260" fill="#06b6d4" opacity=".08"/>
+
+  <text x="72" y="78" class="section">FOUCREATIVE / SYSTEM OVERVIEW</text>
+  <text x="72" y="126" class="title">Arsitektur Sistem Inventaris Klien</text>
+  <text x="72" y="158" class="subtitle">Laravel 12 · PHP 8.2+ · Blade · Alpine.js · Tailwind CSS · Vite</text>
+  <rect x="1310" y="66" width="220" height="40" rx="20" fill="#22d3ee" fill-opacity=".12" stroke="#67e8f9" stroke-opacity=".4"/>
+  <text x="1420" y="91" text-anchor="middle" class="pill">GLASS THEME · WEB APP</text>
+
+  <text x="72" y="220" class="section">PENGGUNA</text>
+  <text x="392" y="220" class="section">LAPISAN PRESENTASI</text>
+  <text x="770" y="220" class="section">APLIKASI LARAVEL</text>
+  <text x="1180" y="220" class="section">PENYIMPANAN &amp; OUTPUT</text>
+
+  <!-- Users -->
+  <g filter="url(#shadow)">
+    <rect x="72" y="252" width="250" height="150" rx="22" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".24"/>
+    <circle cx="112" cy="298" r="20" fill="#6366f1" fill-opacity=".45"/>
+    <path d="M104 299a8 8 0 1 1 16 0m-21 17c1-8 7-12 13-12s12 4 13 12" fill="none" stroke="#e0e7ff" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="145" y="296" class="card-title">Admin</text>
+    <text x="96" y="342" class="body">Login &amp; dashboard klien</text>
+    <text x="96" y="366" class="body">Review, status, data, PDF</text>
+    <rect x="96" y="378" width="105" height="18" rx="9" fill="#818cf8" fill-opacity=".24"/>
+    <text x="148" y="391" text-anchor="middle" class="muted">Middleware auth</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="72" y="438" width="250" height="150" rx="22" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".24"/>
+    <circle cx="112" cy="484" r="20" fill="#06b6d4" fill-opacity=".35"/>
+    <circle cx="112" cy="479" r="7" fill="none" stroke="#cffafe" stroke-width="2.4"/>
+    <path d="M98 499c2-9 7-13 14-13s12 4 14 13" fill="none" stroke="#cffafe" stroke-width="2.4" stroke-linecap="round"/>
+    <text x="145" y="482" class="card-title">Klien</text>
+    <text x="96" y="528" class="body">Portal onboarding bertoken</text>
+    <text x="96" y="552" class="body">Isi 9 modul &amp; unggah dokumen</text>
+    <rect x="96" y="564" width="146" height="18" rx="9" fill="#22d3ee" fill-opacity=".18"/>
+    <text x="169" y="577" text-anchor="middle" class="muted">Token middleware</text>
+  </g>
+
+  <!-- Presentation -->
+  <g filter="url(#shadow)">
+    <rect x="392" y="252" width="300" height="336" rx="24" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".28"/>
+    <rect x="416" y="276" width="44" height="38" rx="12" fill="url(#blue)"/>
+    <path d="M426 288h24m-24 8h24m-24 8h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="474" y="301" class="card-title">Web UI</text>
+    <text x="416" y="348" class="body">Blade templates</text>
+    <text x="416" y="372" class="body">Admin dashboard &amp; detail klien</text>
+    <text x="416" y="396" class="body">Wizard onboarding responsif</text>
+    <text x="416" y="420" class="body">Autosave via JSON</text>
+    <line x1="416" y1="442" x2="668" y2="442" stroke="#fff" stroke-opacity=".18"/>
+    <text x="416" y="470" class="section">UI TOOLING</text>
+    <rect x="416" y="486" width="106" height="30" rx="15" fill="#818cf8" fill-opacity=".2"/>
+    <text x="469" y="506" text-anchor="middle" class="pill">Alpine.js</text>
+    <rect x="532" y="486" width="116" height="30" rx="15" fill="#22d3ee" fill-opacity=".16"/>
+    <text x="590" y="506" text-anchor="middle" class="pill">Tailwind CSS</text>
+    <rect x="416" y="528" width="74" height="30" rx="15" fill="#a78bfa" fill-opacity=".2"/>
+    <text x="453" y="548" text-anchor="middle" class="pill">Vite</text>
+  </g>
+
+  <!-- Laravel application -->
+  <g filter="url(#shadow)">
+    <rect x="770" y="252" width="360" height="336" rx="24" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".30"/>
+    <rect x="794" y="276" width="44" height="38" rx="12" fill="#f97316" fill-opacity=".85"/>
+    <path d="M804 289l12-7 12 7v12l-12 7-12-7Zm12-7v26m-12-19 12 7 12-7" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/>
+    <text x="852" y="301" class="card-title">Laravel 12 Application</text>
+    <text x="794" y="350" class="section">ROUTES &amp; ACCESS</text>
+    <text x="794" y="374" class="body">routes/web.php · auth · token verification</text>
+    <line x1="794" y1="391" x2="1106" y2="391" stroke="#fff" stroke-opacity=".18"/>
+    <text x="794" y="420" class="section">CONTROLLERS</text>
+    <text x="794" y="444" class="body">Auth · Admin Dashboard · Admin Client</text>
+    <text x="794" y="468" class="body">Client Onboarding · PDF Export</text>
+    <line x1="794" y1="485" x2="1106" y2="485" stroke="#fff" stroke-opacity=".18"/>
+    <text x="794" y="514" class="section">DOMAIN MODELS / ELOQUENT</text>
+    <text x="794" y="538" class="body">Client · Credential · KBLI · Onboarding Item</text>
+    <text x="794" y="562" class="body">Knowledge Base · Technical Checklist</text>
+  </g>
+
+  <!-- Storage -->
+  <g filter="url(#shadow)">
+    <rect x="1180" y="252" width="350" height="188" rx="24" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".28"/>
+    <circle cx="1220" cy="294" r="18" fill="#34d399" fill-opacity=".30"/>
+    <ellipse cx="1220" cy="289" rx="10" ry="4" fill="none" stroke="#d1fae5" stroke-width="2"/>
+    <path d="M1210 289v12c0 5 20 5 20 0v-12m-20 6c0 5 20 5 20 0" fill="none" stroke="#d1fae5" stroke-width="2"/>
+    <text x="1252" y="300" class="card-title">Database</text>
+    <text x="1204" y="338" class="body">MySQL / SQLite</text>
+    <text x="1204" y="366" class="muted">clients · users · credentials</text>
+    <text x="1204" y="388" class="muted">onboarding items · KBLI · knowledge</text>
+    <text x="1204" y="410" class="muted">checklists · sessions · jobs</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="1180" y="466" width="350" height="122" rx="24" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".28"/>
+    <rect x="1204" y="490" width="34" height="36" rx="6" fill="#fbbf24" fill-opacity=".78"/>
+    <path d="M1212 500h18m-18 7h18m-18 7h12" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="1252" y="506" class="card-title">File Storage</text>
+    <text x="1204" y="550" class="body">Dokumen klien · disk public</text>
+    <text x="1204" y="572" class="muted">Path file disimpan pada item onboarding</text>
+  </g>
+
+  <!-- PDF output -->
+  <g filter="url(#shadow)">
+    <rect x="1180" y="624" width="350" height="104" rx="24" fill="url(#glass)" stroke="#ffffff" stroke-opacity=".28"/>
+    <rect x="1204" y="649" width="34" height="42" rx="5" fill="#fb7185" fill-opacity=".75"/>
+    <path d="M1211 660h20m-20 7h16m-16 7h13" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <text x="1252" y="662" class="card-title">PDF Export</text>
+    <text x="1204" y="708" class="body">DomPDF · dokumen onboarding</text>
+  </g>
+
+  <!-- Flow connectors -->
+  <path d="M322 327H392" class="edge"/>
+  <path d="M322 513H356V465H392" class="edge"/>
+  <path d="M692 420H770" class="edge"/>
+  <path d="M1130 370H1180" class="edge"/>
+  <path d="M1130 508H1152V527H1180" class="edge"/>
+  <path d="M1130 552H1150V676H1180" class="edge-soft"/>
+  <path d="M1000 588V676H1180" class="edge-soft"/>
+
+  <!-- Bottom flow -->
+  <rect x="72" y="790" width="1458" height="142" rx="26" fill="#020617" fill-opacity=".28" stroke="#ffffff" stroke-opacity=".14"/>
+  <text x="104" y="828" class="section">ALUR UTAMA</text>
+  <g>
+    <rect x="104" y="850" width="250" height="52" rx="16" fill="#6366f1" fill-opacity=".22" stroke="#818cf8" stroke-opacity=".45"/>
+    <text x="229" y="882" text-anchor="middle" class="pill">Admin buat profil klien</text>
+    <path d="M355 876h54" class="edge"/>
+    <rect x="414" y="850" width="250" height="52" rx="16" fill="#06b6d4" fill-opacity=".18" stroke="#67e8f9" stroke-opacity=".4"/>
+    <text x="539" y="882" text-anchor="middle" class="pill">Klien isi 9 modul</text>
+    <path d="M665 876h54" class="edge"/>
+    <rect x="724" y="850" width="250" height="52" rx="16" fill="#8b5cf6" fill-opacity=".20" stroke="#c4b5fd" stroke-opacity=".42"/>
+    <text x="849" y="882" text-anchor="middle" class="pill">Simpan &amp; unggah dokumen</text>
+    <path d="M975 876h54" class="edge"/>
+    <rect x="1034" y="850" width="220" height="52" rx="16" fill="#10b981" fill-opacity=".17" stroke="#6ee7b7" stroke-opacity=".4"/>
+    <text x="1144" y="882" text-anchor="middle" class="pill">Admin review</text>
+    <path d="M1255 876h54" class="edge"/>
+    <rect x="1314" y="850" width="184" height="52" rx="16" fill="#f59e0b" fill-opacity=".18" stroke="#fcd34d" stroke-opacity=".4"/>
+    <text x="1406" y="882" text-anchor="middle" class="pill">Siap deploy / PDF</text>
+  </g>
+
+  <text x="72" y="970" class="muted">Diagram arsitektur aplikasi saat ini · public/arsitektur-sistem.svg</text>
+</svg>
